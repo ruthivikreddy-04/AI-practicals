@@ -1,0 +1,49 @@
+import numpy as np
+
+# 3x3 Grid World
+rows, cols = 3, 3
+goal = (2, 2)
+gamma = 0.9
+
+V = np.zeros((rows, cols))
+actions = [(0,1), (0,-1), (1,0), (-1,0)]
+
+# Value Iteration
+for _ in range(100):
+    new_V = V.copy()
+
+    for r in range(rows):
+        for c in range(cols):
+            if (r, c) == goal:
+                continue
+
+            values = []
+            for dr, dc in actions:
+                nr, nc = r + dr, c + dc
+
+                if 0 <= nr < rows and 0 <= nc < cols:
+                    reward = 10 if (nr, nc) == goal else -1
+                    values.append(reward + gamma * V[nr, nc])
+
+            new_V[r, c] = max(values)
+
+    V = new_V
+
+print("State Values:")
+print(np.round(V, 2))
+
+# Extract optimal policy
+for r in range(rows):
+    for c in range(cols):
+        if (r, c) == goal:
+            print("G", end=" ")
+        else:
+            best = max(actions, key=lambda a:
+                (-1 if not (0 <= r+a[0] < rows and
+                            0 <= c+a[1] < cols)
+                 else (10 if (r+a[0], c+a[1]) == goal else -1)
+                 + gamma * V[r+a[0], c+a[1]]))
+
+            print({(0,1): "→", (0,-1): "←",
+                   (1,0): "↓", (-1,0): "↑"}[best], end=" ")
+    print()
