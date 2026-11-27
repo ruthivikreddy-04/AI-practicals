@@ -1,0 +1,14 @@
+# Propositional logic inference
+
+# Facts
+rain = True
+
+# Rules
+road_wet = rain
+road_slippery = road_wet
+
+# Inference
+if rain and road_wet:
+    print("It is raining.")
+    print("The road is wet.")
+    print("The road is slippery.")
