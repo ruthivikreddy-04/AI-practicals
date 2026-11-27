@@ -1,0 +1,23 @@
+from sklearn.naive_bayes import BernoulliNB
+
+# Training data: Fever, Cough
+X = [[1, 1], [1, 0], [0, 1], [0, 0],
+     [1, 1], [0, 0], [1, 0], [0, 1]]
+
+# 1 = Flu, 0 = No Flu
+y = [1, 1, 0, 0, 1, 0, 1, 0]
+
+# Create and train the classifier
+model = BernoulliNB()
+model.fit(X, y)
+
+# Take patient symptoms as input
+fever = int(input("Fever (1=Yes, 0=No): "))
+cough = int(input("Cough (1=Yes, 0=No): "))
+
+# Perform inference
+result = model.predict([[fever, cough]])
+prob = model.predict_proba([[fever, cough]])
+
+print("Prediction:", "Flu" if result[0] == 1 else "No Flu")
+print("Probability of Flu:", round(prob[0][1] * 100, 2), "%")
