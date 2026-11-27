@@ -1,0 +1,107 @@
+# Practical 2 — BFS, DFS and Uniform-Cost Search
+# Run:  python P2_bfs_dfs_ucs.py
+# Libraries: collections.deque (queue) and heapq (priority queue)
+ 
+from collections import deque
+import heapq
+ 
+# Campus map. Each neighbour is (place, minutes).
+CAMPUS = {
+    "Hostel":   [("Canteen", 2), ("MainBldg", 4)],
+    "Canteen":  [("Hostel", 2), ("Library", 3), ("Garden", 5)],
+    "Library":  [("Canteen", 3), ("ExamHall", 2), ("Garden", 2)],
+    "MainBldg": [("Hostel", 4), ("Garden", 3)],
+    "Garden":   [("Canteen", 5), ("MainBldg", 3), ("Library", 2), ("ExamHall", 4)],
+    "ExamHall": [("Library", 2), ("Garden", 4)],
+}
+ 
+ 
+def rebuild(parent, goal):
+    # Walk backwards from the goal using the parent map.
+    path = [goal]
+    while path[-1] in parent:
+        path.append(parent[path[-1]])
+    path.reverse()
+    return path
+ 
+ 
+def bfs(graph, start, goal):
+    # Queue = first discovered is first visited (fewest doors).
+    queue = deque([start])
+    seen = {start}
+    parent = {}
+    expanded = 0
+    while queue:
+        here = queue.popleft()          # THE BFS LINE
+        expanded += 1
+        if here == goal:
+            return rebuild(parent, here), expanded
+        for nxt, _minutes in graph[here]:
+            if nxt not in seen:
+                seen.add(nxt)
+                parent[nxt] = here
+                queue.append(nxt)
+    return None, expanded
+ 
+ 
+def dfs(graph, start, goal):
+    # Stack = last discovered is first visited (one deep path).
+    stack = [start]
+    seen = {start}
+    parent = {}
+    expanded = 0
+    while stack:
+        here = stack.pop()              # THE DFS LINE
+        expanded += 1
+        if here == goal:
+            return rebuild(parent, here), expanded
+        for nxt, _minutes in graph[here]:
+            if nxt not in seen:
+                seen.add(nxt)
+                parent[nxt] = here
+                stack.append(nxt)
+    return None, expanded
+ 
+ 
+def ucs(graph, start, goal):
+    # Priority queue on g = minutes already walked (cheapest so far).
+    heap = [(0, start)]                 # (g, place)
+    best = {start: 0}
+    parent = {}
+    expanded = 0
+    done = set()
+    while heap:
+        cost, here = heapq.heappop(heap)   # THE UCS LINE
+        if here in done:
+            continue
+        done.add(here)
+        expanded += 1
+        if here == goal:
+            return rebuild(parent, here), cost, expanded
+        for nxt, minutes in graph[here]:
+            new_g = cost + minutes
+            if new_g < best.get(nxt, 10 ** 9):
+                best[nxt] = new_g
+                parent[nxt] = here
+                heapq.heappush(heap, (new_g, nxt))
+    return None, None, expanded
+ 
+ 
+def show(name, path, cost, expanded):
+    walk = " -> ".join(path) if path else "none"
+    print(f"{name:<8} {walk:<48} {str(cost):<8} {expanded}")
+ 
+ 
+if __name__ == "__main__":
+    print("PRACTICAL 2  |  Hostel -> ExamHall")
+    print(f"{'Method':<8} {'Path':<48} {'Cost':<8} Expanded")
+    p, e = bfs(CAMPUS, "Hostel", "ExamHall")
+    show("BFS", p, len(p) - 1 if p else None, e)
+    p, e = dfs(CAMPUS, "Hostel", "ExamHall")
+    show("DFS", p, None, e)
+    p, cost, e = ucs(CAMPUS, "Hostel", "ExamHall")
+    show("UCS", p, cost, e)
+    print()
+    print("BFS cost is the number of doors. UCS cost is real minutes.")
+    print("UCS should be 7 minutes: Hostel -> Canteen -> Library -> ExamHall.")
+
