@@ -1,0 +1,76 @@
+# Practical 5 — Tiny rule-based expert system (class demo, not a doctor)
+# Run:  python P5_expert_system.py
+# Library: none. Only plain Python 3.
+ 
+# Each rule is: IF all of these facts are present, AND none of the forbidden
+# facts are present, THEN give this advice.
+RULES = [
+    {
+        "id": "R1",
+        "if_all": ["high_fever", "body_pain", "sudden_start"],
+        "advice": "Possible flu-like illness. Rest, fluids, and visit the campus clinic today.",
+        "level": "clinic",
+    },
+    {
+        "id": "R2",
+        "if_all": ["runny_nose", "sneezing"],
+        "if_none": ["high_fever"],
+        "advice": "Looks like a common cold. Warm fluids and rest.",
+        "level": "self-care",
+    },
+    {
+        "id": "R4",
+        "if_all": ["breathless", "chest_pain"],
+        "advice": "Breathlessness with chest pain is urgent. Go to emergency now.",
+        "level": "emergency",
+    },
+    {
+        "id": "R5",
+        "if_all": ["headache", "long_screen"],
+        "if_none": ["high_fever"],
+        "advice": "Likely eye-strain. 20-20-20 rest and water.",
+        "level": "self-care",
+    },
+]
+ 
+ 
+def infer(selected):
+    # Forward chaining in a tiny form: facts go in, matching rules fire.
+    selected = set(selected)
+    fired = []
+    for rule in RULES:
+        if not set(rule["if_all"]).issubset(selected):
+            continue                       # a required fact is missing
+        if set(rule.get("if_none", [])).intersection(selected):
+            continue                       # a forbidden fact is present
+        fired.append(rule)
+ 
+    if not fired:
+        return "unknown", "No rule matched. Ask a nurse.", []
+ 
+    # Serious advice must be shown first.
+    order = {"emergency": 0, "clinic": 1, "self-care": 2}
+    fired.sort(key=lambda r: order.get(r["level"], 9))
+    top = fired[0]
+    return top["level"], top["advice"], [r["id"] for r in fired]
+ 
+ 
+def demo(name, facts):
+    level, advice, rules = infer(facts)
+    print("-" * 56)
+    print(name, ":", ", ".join(facts) or "(none)")
+    print("Level :", level)
+    print("Advice:", advice)
+    print("Rules :", ", ".join(rules) or "none")
+    print("This is a class demo, not a medical diagnosis.")
+ 
+ 
+if __name__ == "__main__":
+    print("PRACTICAL 5  |  Campus health advisor (demo only)")
+    demo("Case 1 cold", ["runny_nose", "sneezing"])
+    demo("Case 2 flu-like", ["high_fever", "body_pain", "sudden_start"])
+    demo("Case 3 emergency", ["breathless", "chest_pain"])
+    demo("Case 4 no match", ["sore_throat", "high_fever"])
+
+
+                                         
