@@ -1,0 +1,38 @@
+# Practical 1 — Simple reflex cleaner
+# Run:  python P1_simple_agent.py
+# Library: none. Only plain Python 3.
+ 
+def sense(room, position):
+    # Sensor: look at the tile under the wheels.
+    return room[position]
+ 
+ 
+def reflex_agent(percept):
+    # Simple reflex rule: if dirty then suck, else move.
+    if percept == "Dirty":
+        return "Suck"
+    return "Move"
+ 
+ 
+def run_reflex():
+    # The world is a row of five tiles. The robot starts at tile 0.
+    room = ["Dirty", "Clean", "Dirty", "Clean", "Dirty"]
+    position = 0
+    print("Start room:", room)
+ 
+    while position < len(room):
+        percept = sense(room, position)          # what do I see?
+        action = reflex_agent(percept)           # what should I do?
+        if action == "Suck":
+            room[position] = "Clean"             # the environment changes
+        print("Tile", position, "saw", percept, "->", action, "->", room[position])
+        position += 1                            # move one tile to the right
+ 
+    # Goal-based check: is every tile clean?
+    goal = all(tile == "Clean" for tile in room)
+    print("Final room:", room)
+    print("Goal (all clean) reached?", goal)
+ 
+ 
+if __name__ == "__main__":
+    run_reflex()
