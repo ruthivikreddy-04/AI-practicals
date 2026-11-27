@@ -1,0 +1,17 @@
+# Initial state
+state = {"A": "table", "B": "table", "C": "table"}
+
+# Goal state
+goal = {"A": "B", "B": "C"}
+
+# STRIPS action: Move block X onto block Y
+def move(x, y):
+    if state[x] == "table" or state[x] in state:
+        state[x] = y
+        print("Move", x, "onto", y)
+
+# Goal-stack planning
+move("B", "C")
+move("A", "B")
+
+print("Final State:", state)
